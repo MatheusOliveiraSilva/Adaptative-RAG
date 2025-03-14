@@ -1,12 +1,12 @@
 langgraph
 langchain_community
 tiktoken
+pinecone
 langchain-openai
-langchain-cohere
+langchain_pinecone
 langchainhub
 chromadb
 langchain
 tavily-python
 python-dotenv
-
-
+bs4
