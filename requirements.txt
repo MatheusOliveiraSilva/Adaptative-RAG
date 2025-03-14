@@ -1,0 +1,12 @@
+langgraph
+langchain_community
+tiktoken
+langchain-openai
+langchain-cohere
+langchainhub
+chromadb
+langchain
+tavily-python
+python-dotenv
+
+
