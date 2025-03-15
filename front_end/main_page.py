@@ -1,14 +1,18 @@
 import sys
 import os
 
-os.system("pip uninstall -y pinecone-plugin-inference || true")
+import types
+
+# Cria um módulo dummy para 'pinecone_plugins.inference' que evita o erro
+dummy = types.ModuleType("pinecone_plugins.inference")
+dummy.__installables__ = None
+sys.modules["pinecone_plugins.inference"] = dummy
 
 # Get the base directory and append to sys.path to allow imports
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(BASE_DIR)
 
 import streamlit as st
-import os
 import uuid
 from streamlit_javascript import st_javascript
 import requests
