@@ -1,3 +1,5 @@
+streamlit
+streamlit-javascript
 langgraph
 langchain_community
 tiktoken
@@ -10,3 +12,12 @@ langchain
 tavily-python
 python-dotenv
 bs4
+starlette
+itsdangerous
+uvicorn
+fastapi
+sqlalchemy
+psycopg2-binary
+requests
+anthropic
+langchain-anthropic
