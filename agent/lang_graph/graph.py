@@ -1,4 +1,5 @@
 from langgraph.graph import END, StateGraph, START
+from langgraph.checkpoint.memory import MemorySaver
 from agent.lang_graph.states import GraphState
 from agent.lang_graph.nodes import AdaptiveRAGNodes
 from agent.lang_graph.edges import AdaptiveRAGEdges
@@ -13,7 +14,7 @@ class AdaptiveRAGGraph:
         self.Graph = self.setup_nodes(self.Graph)
         self.Graph = self.setup_edges(self.Graph)
 
-        self.agent = self.Graph.compile()
+        self.agent = self.Graph.compile(checkpointer=MemorySaver())
 
     def setup_nodes(self, graph: StateGraph) -> StateGraph:
         graph.add_node("web_search", self.nodes.web_search)
