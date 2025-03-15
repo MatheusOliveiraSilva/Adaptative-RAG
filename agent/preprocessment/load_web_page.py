@@ -26,7 +26,8 @@ class WebPageLoader:
         )
 
         self.embedding_model = OpenAIEmbeddings(
-            model="text-embedding-3-large"
+            model="text-embedding-3-large",
+            openai_api_key=os.getenv("OPENAI_API_KEY")
         )
 
         self.pc.create_index(
