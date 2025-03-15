@@ -1,6 +1,8 @@
 import sys
 import os
 
+os.system("pip uninstall -y pinecone-plugin-inference || true")
+
 # Get the base directory and append to sys.path to allow imports
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(BASE_DIR)
