@@ -1,7 +1,7 @@
 from langgraph.graph import END, StateGraph, START
-from agent.langgraph.states import GraphState
-from agent.langgraph.nodes import AdaptiveRAGNodes
-from agent.langgraph.edges import AdaptiveRAGEdges
+from agent.lang_graph.states import GraphState
+from agent.lang_graph.nodes import AdaptiveRAGNodes
+from agent.lang_graph.edges import AdaptiveRAGEdges
 
 class AdaptiveRAGGraph:
     def __init__(self):
@@ -59,8 +59,3 @@ class AdaptiveRAGGraph:
         )
 
         return graph
-    
-if __name__ == "__main__":
-    graph = AdaptiveRAGGraph()
-    response = graph.agent.invoke({"question": "What are the types of agent memory?"})
-    print(response["generation"])

@@ -1,19 +1,25 @@
 from langchain_openai import ChatOpenAI
 from langchain_core.output_parsers import StrOutputParser
-from agent.langgraph.output_models import RouteQuery, GradeDocuments, GradeHallucinations, GradeAnswer
-from agent.langgraph.prompts import (
+from agent.lang_graph.output_models import RouteQuery, GradeDocuments, GradeHallucinations, GradeAnswer
+from agent.lang_graph.prompts import (
     ROUTING_PROMPT, GRADING_PROMPT, HALLUCINATION_PROMPT, 
     ANSWER_PROMPT, REWRITE_PROMPT, RAG_PROMPT
 )
 from dotenv import load_dotenv
 from pathlib import Path
+import os
 
 root_dir = Path().absolute()
 
 load_dotenv(dotenv_path=root_dir / ".env")
 
 # --- LLM Instances ---
-GPT_4O_MINI = ChatOpenAI(model="gpt-4o-mini", temperature=0)
+# Use the OPENAI_API_KEY environment variable explicitly
+GPT_4O_MINI = ChatOpenAI(
+    model="gpt-4o-mini", 
+    temperature=0,
+    openai_api_key=os.environ.get("OPENAI_API_KEY")
+)
 
 # --- Chains ---
 query_router_llm = GPT_4O_MINI.with_structured_output(RouteQuery)

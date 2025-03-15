@@ -5,12 +5,13 @@ from pinecone import Pinecone
 from pathlib import Path
 from langchain_core.documents import Document
 from langchain_community.tools.tavily_search import TavilySearchResults
-from agent.langgraph.states import GraphState
-from agent.langgraph.chains import (
+from agent.lang_graph.states import GraphState
+from agent.lang_graph.chains import (
     question_rewriter_chain, answer_grader_chain, 
     document_grader_chain, hallucination_grader_chain, 
     query_router_chain, rag_chain
 )
+import os
 
 root_dir = Path().absolute()
 
@@ -21,7 +22,10 @@ class AdaptiveRAGNodes:
         # --- Pinecone Setup ---
         self.pc = Pinecone()
         self.index = self.pc.Index("web-ai-engineer-index")
-        self.embedding_model = OpenAIEmbeddings(model="text-embedding-3-large")
+        self.embedding_model = OpenAIEmbeddings(
+            model="text-embedding-3-large",
+            openai_api_key=os.environ.get("OPENAI_API_KEY")
+        )
         self.vector_store = PineconeVectorStore(index=self.index, embedding=self.embedding_model)
 
         # --- Web and Vectorstore Retrievers ---
