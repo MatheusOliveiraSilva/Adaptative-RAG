@@ -3,8 +3,18 @@ import streamlit as st
 from langchain_core.messages import HumanMessage, AIMessageChunk, AIMessage
 from langchain_core.output_parsers import StrOutputParser
 from langchain_openai import ChatOpenAI
+import os
+from dotenv import load_dotenv
+from pathlib import Path
 
-summary_llm = ChatOpenAI(model="gpt-4o-mini-2024-07-18")
+root_dir = Path().absolute()
+load_dotenv(dotenv_path=root_dir / ".env")
+
+# Explicitly use the OpenAI API key
+summary_llm = ChatOpenAI(
+    model="gpt-4o-mini-2024-07-18",
+    openai_api_key=os.environ.get("OPENAI_API_KEY")
+)
 
 def stream_assistant_response(prompt, graph, memory_config) -> str:
     """
@@ -24,9 +34,9 @@ def stream_assistant_response(prompt, graph, memory_config) -> str:
     thinking_placeholder = st.empty()
 
     for response in graph.stream(
-            {"messages": [HumanMessage(content=prompt)]},
-            stream_mode="messages",
-            config=memory_config
+        {"question": prompt},
+        stream_mode="messages",
+        config=memory_config
     ):
         if isinstance(response, tuple):
             for item in response:

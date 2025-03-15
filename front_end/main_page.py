@@ -11,12 +11,13 @@ import uuid
 from streamlit_javascript import st_javascript
 import requests
 
-from agent.langgraph.graph import AdaptiveRAGGraph
+from agent.lang_graph.graph import AdaptiveRAGGraph
 from front_end.utils.message_utils import stream_assistant_response, convert_messages_to_save, summary_conversation_theme
 
 st.set_page_config(layout="wide")
 
-graph = AdaptiveRAGGraph()
+graph = AdaptiveRAGGraph().agent
+
 sidebar_style = """
 <style>
 [data-testid="stSidebar"] > div:first-child {
@@ -43,6 +44,8 @@ API_URL = "http://localhost:8000"
 # Simple session management
 if "user_session_id" not in st.session_state:
     st.session_state.user_session_id = None
+if "user_name" not in st.session_state:
+    st.session_state.user_name = None
 
 # Check for existing session cookie
 raw_cookies = st_javascript("document.cookie")
@@ -76,20 +79,31 @@ if not st.session_state.user_session_id:
         submit = st.form_submit_button("Login")
         
         if submit and username:
-            # Generate a unique session ID
-            new_session_id = str(uuid.uuid4())
-            st.session_state.user_session_id = new_session_id
-            
-            # Set cookie via JavaScript
-            st.markdown(
-                f"""
-                <script>
-                    document.cookie = "session_token={new_session_id}; path=/; max-age=86400";
-                </script>
-                """,
-                unsafe_allow_html=True
+            # Call the backend login API
+            response = requests.post(
+                f"{API_URL}/auth/login-simple",
+                json={"username": username}
             )
-            st.rerun()
+            
+            if response.status_code == 200:
+                # Extract session token from response
+                data = response.json()
+                new_session_id = data["session_token"]
+                st.session_state.user_session_id = new_session_id
+                st.session_state.user_name = data["user"]["name"]
+                
+                # Set cookie via JavaScript
+                st.markdown(
+                    f"""
+                    <script>
+                        document.cookie = "session_token={new_session_id}; path=/; max-age=86400";
+                    </script>
+                    """,
+                    unsafe_allow_html=True
+                )
+                st.rerun()
+            else:
+                st.error("Failed to login. Please try again.")
     
     st.stop()
 
@@ -119,6 +133,7 @@ st.sidebar.title("Conversations")
 # Logout button
 if st.sidebar.button("Logout"):
     st.session_state.user_session_id = None
+    st.session_state.user_name = None
     st.session_state.messages = []
     st.session_state.thread_id = None
     st.session_state.thoughts = ""
@@ -139,6 +154,10 @@ if st.sidebar.button("New Chat"):
     st.session_state.thread_id = None
     st.session_state.thoughts = ""
     st.rerun()
+
+# Verifica e exibe o nome do usuário se disponível
+if st.session_state.user_name:
+    st.sidebar.markdown(f"👤 **{st.session_state.user_name}**")
 
 conversations_list = load_conversations()
 if conversations_list:
