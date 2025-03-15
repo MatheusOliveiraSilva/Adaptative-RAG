@@ -3,12 +3,14 @@
 
 venv/
 
+agent/langgraph/__pycache__/
+
+front_end/utils/__pycache__/
+
 agent/__pycache__/
 
 agent/lang_graph/__pycache__/
 
 front_end/__pycache__/
-
-front_end/utils/__pycache__/
 
 memory_management/__pycache__/
