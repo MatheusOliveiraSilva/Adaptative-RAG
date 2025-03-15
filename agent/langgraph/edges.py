@@ -5,8 +5,8 @@ from pinecone import Pinecone
 from pathlib import Path
 from langchain_core.documents import Document
 from langchain_community.tools.tavily_search import TavilySearchResults
-from states import GraphState
-from chains import query_router_chain
+from agent.langgraph.states import GraphState
+from agent.langgraph.chains import query_router_chain
 
 root_dir = Path().absolute()
 

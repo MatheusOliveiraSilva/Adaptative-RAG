@@ -1,7 +1,7 @@
 from langchain_openai import ChatOpenAI
 from langchain_core.output_parsers import StrOutputParser
-from output_models import RouteQuery, GradeDocuments, GradeHallucinations, GradeAnswer
-from prompts import (
+from agent.langgraph.output_models import RouteQuery, GradeDocuments, GradeHallucinations, GradeAnswer
+from agent.langgraph.prompts import (
     ROUTING_PROMPT, GRADING_PROMPT, HALLUCINATION_PROMPT, 
     ANSWER_PROMPT, REWRITE_PROMPT, RAG_PROMPT
 )

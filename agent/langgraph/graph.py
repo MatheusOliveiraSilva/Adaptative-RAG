@@ -1,7 +1,7 @@
 from langgraph.graph import END, StateGraph, START
-from states import GraphState
-from nodes import AdaptiveRAGNodes
-from edges import AdaptiveRAGEdges
+from agent.langgraph.states import GraphState
+from agent.langgraph.nodes import AdaptiveRAGNodes
+from agent.langgraph.edges import AdaptiveRAGEdges
 
 class AdaptiveRAGGraph:
     def __init__(self):
