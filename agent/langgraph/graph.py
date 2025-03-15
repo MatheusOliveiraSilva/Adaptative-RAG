@@ -62,4 +62,5 @@ class AdaptiveRAGGraph:
     
 if __name__ == "__main__":
     graph = AdaptiveRAGGraph()
-    print(graph.agent.invoke({"question": "What are the types of agent memory?"}))
+    response = graph.agent.invoke({"question": "What are the types of agent memory?"})
+    print(response["generation"])

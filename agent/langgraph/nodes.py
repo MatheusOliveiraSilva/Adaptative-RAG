@@ -41,7 +41,7 @@ class AdaptiveRAGNodes:
         Returns:
             GraphState with documents and question
         """
-
+        print(f"--- Retrieving documents ---")
         docs = self.retriever.invoke(state["question"])
 
         return {"documents": docs, "question": state["question"]}
@@ -59,7 +59,7 @@ class AdaptiveRAGNodes:
         Returns:
             GraphState with answer
         """
-
+        print(f"--- Generating answer ---")
         generation = rag_chain.invoke({"question": state["question"], "documents": self.format_docs(state["documents"])})
         return {"documents": state["documents"], "question": state["question"], "generation": generation}
 
@@ -74,6 +74,7 @@ class AdaptiveRAGNodes:
             GraphState with documents and question
         """
 
+        print(f"--- Grading documents ---")
         filtered_docs = []
         for doc in state["documents"]:
             isRelevant = document_grader_chain.invoke({"document": self.format_docs([doc]), "question": state["question"]})
@@ -92,7 +93,7 @@ class AdaptiveRAGNodes:
         Returns:
             GraphState with better question
         """
-
+        print(f"--- Rewriting query ---")
         better_query = question_rewriter_chain.invoke({"question": state["question"]})
         return {"question": better_query, "documents": state["documents"]}
     
@@ -103,6 +104,7 @@ class AdaptiveRAGNodes:
         Args:
             state: GraphState with current state (question).
         """
+        print(f"--- Searching web ---")
         docs = self.web_search_tool.invoke({"query": state["question"]})
 
         web_results = "\n".join([d["content"] for d in docs])
@@ -117,6 +119,7 @@ class AdaptiveRAGNodes:
         Args:
             state: GraphState with current state (question).
         """
+        print(f"--- Grading generation ---")
         is_grounded = hallucination_grader_chain.invoke(
             {
                 "documents": self.format_docs(state["documents"]), 

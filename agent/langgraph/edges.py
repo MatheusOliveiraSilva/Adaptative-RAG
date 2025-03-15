@@ -6,11 +6,7 @@ from pathlib import Path
 from langchain_core.documents import Document
 from langchain_community.tools.tavily_search import TavilySearchResults
 from states import GraphState
-from chains import (
-    question_rewriter_chain, answer_grader_chain, 
-    document_grader_chain, hallucination_grader_chain, 
-    query_router_chain, rag_chain
-)
+from chains import query_router_chain
 
 root_dir = Path().absolute()
 
@@ -38,7 +34,7 @@ class AdaptiveRAGEdges:
         Args:
             state: GraphState with current state (question).
         """
-
+        print(f"--- Routing question ---")
         route = query_router_chain.invoke({"question": state["question"]})
 
         if route.datasource == "web_search":
@@ -53,7 +49,7 @@ class AdaptiveRAGEdges:
         Args:
             state: GraphState with current state (question).
         """
-        
+        print(f"--- Deciding to generate ---")
         filtered_docs = state["documents"]
         if not filtered_docs:
             return "rewrite_query"
