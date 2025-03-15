@@ -39,32 +39,27 @@ def stream_assistant_response(prompt, graph, memory_config) -> str:
     loading_placeholder = st.empty()
 
     for response in graph.stream(
-        {"question": prompt},
+        {"messages": [HumanMessage(content=prompt)]},
         stream_mode="messages",
         config=memory_config
     ):
         if isinstance(response, tuple):
-            # Pega o segundo item do tuple (metadata) para identificar o nó
             if len(response) > 1 and isinstance(response[1], dict):
                 metadata = response[1]
                 
-                # Verifica se temos informação do nó
                 if 'langgraph_node' in metadata:
                     new_node = metadata['langgraph_node']
                     
-                    # Fase de roteamento/início
                     if new_node == '__start__':
                         if not is_routing:
                             is_routing = True
                             loading_placeholder.markdown("⏳ **Searching for relevant documents...**")
                             node_placeholder.empty()
                     
-                    # Nós específicos exceto 'generate'
                     elif new_node != current_node and new_node != 'generate':
                         current_node = new_node
                         is_routing = False
                         
-                        # Mensagens específicas por nó
                         if 'grade_documents' in new_node:
                             loading_placeholder.empty()
                             node_placeholder.markdown("🔍 **Evaluating relevance of generated documents...**")
@@ -72,9 +67,7 @@ def stream_assistant_response(prompt, graph, memory_config) -> str:
                             loading_placeholder.empty()
                             node_placeholder.markdown("📚 **Document relevance is low, searching for more documents...**")
                 
-                # Verifica resultados da avaliação de documentos
                 if 'langgraph_node' in metadata and 'grade_documents' in metadata['langgraph_node']:
-                    # Verificar se há dados de pontuação binária nos chunks
                     for item in response:
                         if isinstance(item, AIMessageChunk) and hasattr(item, 'additional_kwargs'):
                             if 'parsed' in item.additional_kwargs and hasattr(item.additional_kwargs['parsed'], 'binary_score'):
@@ -83,7 +76,7 @@ def stream_assistant_response(prompt, graph, memory_config) -> str:
             
             for item in response:
                 if isinstance(item, AIMessageChunk) and item.content:
-                    # Verifica se tem conteúdo estruturado
+                    
                     if isinstance(item.content, list) and len(item.content) > 0:
                         chunk = item.content[0]
                         if "type" in chunk:
@@ -101,7 +94,7 @@ def stream_assistant_response(prompt, graph, memory_config) -> str:
                                         st.session_state.thoughts
                                     )
                                     thinking_expander_created = True
-                                    node_placeholder.empty()  # Remove a exibição do nó
+                                    node_placeholder.empty()
                                 final_response += chunk["text"]
                                 final_placeholder.markdown(final_response)
         time.sleep(0.3)

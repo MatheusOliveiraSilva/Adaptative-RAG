@@ -58,10 +58,5 @@ REWRITE_PROMPT = ChatPromptTemplate.from_messages(
 
 # --- RAG ---
 RAG_SYSTEM_PROMPT = """You are an expert at elaborating answers using retrieved documents from a vectorstore. \n
-    You are given a user question and a set of documents. Answer the question using the documents."""
-RAG_PROMPT = ChatPromptTemplate.from_messages(
-    [
-        ("system", RAG_SYSTEM_PROMPT),
-        ("human", "User question: \n\n {question} \n\n Documents: \n\n {documents}"),
-    ]
-)
+    You are given a user question and a set of documents. Answer the question using the following documents.
+    \n Documents: \n\n {documents}."""

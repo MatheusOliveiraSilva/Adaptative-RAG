@@ -4,7 +4,7 @@ from langchain_core.output_parsers import StrOutputParser
 from agent.lang_graph.output_models import RouteQuery, GradeDocuments, GradeHallucinations, GradeAnswer
 from agent.lang_graph.prompts import (
     ROUTING_PROMPT, GRADING_PROMPT, HALLUCINATION_PROMPT, 
-    ANSWER_PROMPT, REWRITE_PROMPT, RAG_PROMPT
+    ANSWER_PROMPT, REWRITE_PROMPT
 )
 from dotenv import load_dotenv
 from pathlib import Path
@@ -22,13 +22,13 @@ GPT_4O_MINI = ChatOpenAI(
     openai_api_key=os.environ.get("OPENAI_API_KEY")
 )
 
-CLAUDE_3_7 = ChatAnthropic(
-    api_key=os.getenv("ANTHROPIC_API_KEY"),
-    model="claude-3-7-sonnet-latest",
-    temperature=1,
-    max_tokens=2048,
-    thinking={"type": "enabled", "budget_tokens": 1024}
-)
+# CLAUDE_3_7 = ChatAnthropic(
+#     api_key=os.getenv("ANTHROPIC_API_KEY"),
+#     model="claude-3-7-sonnet-latest",
+#     temperature=1,
+#     max_tokens=2048,
+#     thinking={"type": "enabled", "budget_tokens": 1024}
+# )
 
 # --- Chains ---
 query_router_llm = GPT_4O_MINI.with_structured_output(RouteQuery)
@@ -44,5 +44,3 @@ answer_grader_llm = GPT_4O_MINI.with_structured_output(GradeAnswer)
 answer_grader_chain = ANSWER_PROMPT | answer_grader_llm
 
 question_rewriter_chain = REWRITE_PROMPT | GPT_4O_MINI | StrOutputParser()
-
-rag_chain = RAG_PROMPT | CLAUDE_3_7 | StrOutputParser()

@@ -1,5 +1,6 @@
-from typing import List
+from typing import List, Annotated
 from typing_extensions import TypedDict
+from langgraph.graph.message import add_messages
 
 
 class GraphState(TypedDict):
@@ -12,6 +13,6 @@ class GraphState(TypedDict):
         documents: list of documents
     """
 
+    messages: Annotated[List, add_messages]
     question: str
-    generation: str
     documents: List[str]

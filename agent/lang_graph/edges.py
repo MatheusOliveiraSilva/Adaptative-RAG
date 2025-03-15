@@ -3,7 +3,6 @@ from langchain_openai import OpenAIEmbeddings
 from dotenv import load_dotenv
 from pinecone import Pinecone
 from pathlib import Path
-from langchain_core.documents import Document
 from langchain_community.tools.tavily_search import TavilySearchResults
 from agent.lang_graph.states import GraphState
 from agent.lang_graph.chains import query_router_chain
@@ -40,7 +39,7 @@ class AdaptiveRAGEdges:
             state: GraphState with current state (question).
         """
         print(f"--- Routing question ---")
-        route = query_router_chain.invoke({"question": state["question"]})
+        route = query_router_chain.invoke({"question": state["messages"][-1].content})
 
         if route.datasource == "web_search":
             return "web_search"
