@@ -40,6 +40,11 @@ if os.path.exists(css_path):
 
 API_URL = "http://localhost:8000"
 
+# Simple session management
+if "user_session_id" not in st.session_state:
+    st.session_state.user_session_id = None
+
+# Check for existing session cookie
 raw_cookies = st_javascript("document.cookie")
 cookies_dict = {}
 if raw_cookies:
@@ -49,20 +54,43 @@ if raw_cookies:
             key, value = key_value
             cookies_dict[key] = value
 
-user_sub = cookies_dict.get("sub")
+# Get session ID from cookie if available
 session_token = cookies_dict.get("session_token")
+if session_token and not st.session_state.user_session_id:
+    st.session_state.user_session_id = session_token
 
-if not user_sub:
+# Login form
+if not st.session_state.user_session_id:
     st.markdown(
-        f"""
+        """
         <div class="centered">
             <h1>AI Engineering Q&A</h1>
-            <h3>You need to login first</h3>
-            <a href="{API_URL}/auth/login" class="login-button">Login</a>
+            <h3>Please login to continue</h3>
         </div>
         """,
         unsafe_allow_html=True
     )
+    
+    with st.form("login_form"):
+        username = st.text_input("Username")
+        submit = st.form_submit_button("Login")
+        
+        if submit and username:
+            # Generate a unique session ID
+            new_session_id = str(uuid.uuid4())
+            st.session_state.user_session_id = new_session_id
+            
+            # Set cookie via JavaScript
+            st.markdown(
+                f"""
+                <script>
+                    document.cookie = "session_token={new_session_id}; path=/; max-age=86400";
+                </script>
+                """,
+                unsafe_allow_html=True
+            )
+            st.rerun()
+    
     st.stop()
 
 # ---------------------- STATES ----------------------
@@ -75,17 +103,36 @@ if "thoughts" not in st.session_state:
 
 # ------------------- Loading Chat History -------------------
 def load_conversations():
+    session_token = st.session_state.user_session_id
     if session_token:
         resp = requests.get(f"{API_URL}/conversation?session_token={session_token}")
         if resp.status_code == 200:
             data = resp.json()
             return data["conversations"]
         else:
-            st.error("Erro to load chats.")
+            st.error("Error loading chats.")
             return []
     return []
 
 st.sidebar.title("Conversations")
+
+# Logout button
+if st.sidebar.button("Logout"):
+    st.session_state.user_session_id = None
+    st.session_state.messages = []
+    st.session_state.thread_id = None
+    st.session_state.thoughts = ""
+    
+    # Clear cookie via JavaScript
+    st.markdown(
+        """
+        <script>
+            document.cookie = "session_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+        </script>
+        """,
+        unsafe_allow_html=True
+    )
+    st.rerun()
 
 if st.sidebar.button("New Chat"):
     st.session_state.messages = []
@@ -104,7 +151,7 @@ if conversations_list:
                 st.session_state.messages.append({"role": role, "content": content})
             st.rerun()
 
-st.title("AI Engineering Q&A")
+st.title("AI Engineering Q&A w/ Adaptive RAG")
 
 # ------------------ Exibição Principal --------------------
 for msg in st.session_state.messages:
@@ -126,6 +173,7 @@ for msg in st.session_state.messages:
 prompt = st.chat_input("Chat with me")
 
 if prompt:
+    session_token = st.session_state.user_session_id
     if st.session_state.thread_id is None:
         st.session_state.thread_id = (session_token or "") + str(uuid.uuid4())
         conversation_theme = summary_conversation_theme(prompt)
@@ -164,4 +212,3 @@ if prompt:
     patch_resp = requests.patch(f"{API_URL}/conversation", json=update_payload)
     if patch_resp.status_code != 200:
         st.error("Error on updating conversation.")
-
