@@ -212,7 +212,7 @@ def update_conversation(data: ConversationUpdate, db: Session = Depends(get_db))
 def get_conversations(session_token: str, db: Session = Depends(get_db)):
     convs = db.query(ConversationThread).filter(
         ConversationThread.session_id == session_token
-    ).order_by(ConversationThread.created_at.asc()).all()
+    ).order_by(ConversationThread.created_at.desc()).all()
 
     return {
         "conversations": [
