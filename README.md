@@ -8,6 +8,8 @@ Adaptative-RAG is an advanced Retrieval-Augmented Generation strategy that dynam
 2. Retrieve document from Pinecone Index (we stored some documents about AI Engineering in index).
 3. Web Search for information if we decide that isn't any of the cases above.
 
+![image](https://github.com/user-attachments/assets/a92eec29-0cfa-444f-8734-70bdbba5e5b9)
+
 ## Implementation Architecture
 
 The system is built using a directed graph architecture implemented with LangGraph, allowing for dynamic routing of user queries through different processing paths:
