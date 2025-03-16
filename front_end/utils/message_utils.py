@@ -62,7 +62,7 @@ def stream_assistant_response(prompt, graph, memory_config) -> str:
                         
                         if 'grade_documents' in new_node:
                             loading_placeholder.empty()
-                            node_placeholder.markdown("🔍 **Evaluating relevance of generated documents...**")
+                            node_placeholder.markdown("🔍 **Evaluating relevance of retrieved documents...**")
                         elif document_relevance_low and 'retrieve_documents' in new_node:
                             loading_placeholder.empty()
                             node_placeholder.markdown("📚 **Document relevance is low, searching for more documents...**")
@@ -109,26 +109,42 @@ def convert_messages_to_save(messages: list) -> list:
     """
     Convert the messages list to a list of lists with the following structure:
       1) 'user' (HumanMessage)
-      2) 'assistant_thought' (AIMessage)
-      3) 'assistant_response' (AIMessage)
+      2) 'assistant_thought' (AIMessage com thinking)
+      3) 'assistant_response' (AIMessage com text)
 
-    We can only do this because we know the order of the messages in the list. It's the anthropic format when we allow the thinking mode, wich is the case.
+    A estrutura da entrada é uma lista com:
+    - HumanMessage com content como string
+    - AIMessage com content como lista que contém dicionários com 'thinking' e 'text'
     """
     messages_to_save = []
-    i = 0
-    n = len(messages)
-
-    while i < n:
-        if i % 3 == 0:
-            messages_to_save.append(["user", messages[i].content])
-            i += 1
-        elif i % 3 == 1:
-            messages_to_save.append(["assistant_thought", messages[i].content])
-            i += 1
-        elif i % 3 == 2:
-            messages_to_save.append(["assistant_response", messages[i].content])
-            i += 1
-
+    
+    for msg in messages:
+        if isinstance(msg, HumanMessage):
+            # Mensagem do usuário - extrair diretamente
+            messages_to_save.append(["user", msg.content])
+        elif isinstance(msg, AIMessage):
+            # Mensagem do assistente - pode conter thinking e text
+            if isinstance(msg.content, list):
+                # Extrair 'thinking' e 'text' da lista de conteúdo
+                thinking_content = None
+                text_content = None
+                
+                for item in msg.content:
+                    if isinstance(item, dict):
+                        if 'type' in item and item['type'] == 'thinking' and 'thinking' in item:
+                            thinking_content = item['thinking']
+                        elif 'type' in item and item['type'] == 'text' and 'text' in item:
+                            text_content = item['text']
+                
+                # Adicionar thinking e text como mensagens separadas
+                if thinking_content:
+                    messages_to_save.append(["assistant_thought", thinking_content])
+                if text_content:
+                    messages_to_save.append(["assistant_response", text_content])
+            else:
+                # Se não for uma lista, trata como resposta
+                messages_to_save.append(["assistant_response", str(msg.content)])
+    
     return messages_to_save
 
 def summary_conversation_theme(prompt: str) -> str:
