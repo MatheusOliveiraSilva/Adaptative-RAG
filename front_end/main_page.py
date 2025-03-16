@@ -1,6 +1,5 @@
-import sys
 import os
-
+import sys
 import types
 
 # Cria um módulo dummy para 'pinecone_plugins.inference' que evita o erro
@@ -12,13 +11,17 @@ sys.modules["pinecone_plugins.inference"] = dummy
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(BASE_DIR)
 
-import streamlit as st
 import uuid
-from streamlit_javascript import st_javascript
 import requests
+import streamlit as st
+from pathlib import Path
+from dotenv import load_dotenv
+from streamlit_javascript import st_javascript
 
 from agent.lang_graph.graph import AdaptiveRAGGraph
 from front_end.utils.message_utils import stream_assistant_response, convert_messages_to_save, summary_conversation_theme
+
+load_dotenv(dotenv_path=Path(__file__).parent / ".env")
 
 st.set_page_config(layout="wide")
 
@@ -45,7 +48,7 @@ if os.path.exists(css_path):
         css_content = f.read()
     st.markdown(f"<style>{css_content}</style>", unsafe_allow_html=True)
 
-API_URL = "http://localhost:8000"
+API_URL = os.environ.get("API_URL")
 
 # Simple session management
 if "user_session_id" not in st.session_state:

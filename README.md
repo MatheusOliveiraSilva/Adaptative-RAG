@@ -2,54 +2,54 @@
 
 ## Overview
 
-Adaptative-RAG is an advanced Retrieval-Augmented Generation system that dynamically adapts to user queries to provide more accurate and contextually relevant responses. By combining the power of large language models with efficient document retrieval techniques, this system enhances the quality of AI-generated responses by grounding them in factual information.
+Adaptative-RAG is an advanced Retrieval-Augmented Generation strategy that dynamically adapts to user queries to provide more accurate and contextually relevant responses. It decides to route the user query to one of 3 options:
 
-## Module Structure
+1. Act as normal chatbot LLM-based, user query don't need extra knowledge.
+2. Retrieve document from Pinecone Index (we stored some documents about AI Engineering in index).
+3. Web Search for information if we decide that isn't any of the cases above.
 
-The repository is organized into the following modules:
+## Implementation Architecture
 
-1. **API Layer** - Handles HTTP requests and serves as the interface between clients and the core RAG system.
-2. **Retrieval Engine** - Responsible for document indexing, vector storage, and efficient retrieval of relevant context.
-3. **Adaptation Module** - Dynamically adjusts retrieval strategies based on query characteristics and feedback.
-4. **Generation Module** - Integrates with language models to produce coherent and factually accurate responses.
-5. **Frontend** - Provides a user-friendly interface for interacting with the RAG system.
+The system is built using a directed graph architecture implemented with LangGraph, allowing for dynamic routing of user queries through different processing paths:
 
-## Getting Started
+### Core Components
 
-### Setting up the Environment
+1. **Query Router**: Analyzes incoming user queries and decides whether to use the vector database (for AI engineering topics) or web search for up-to-date information.
 
-1. Create a virtual environment:
-   ```bash
-   python -m venv venv
-   ```
+2. **Document Retrieval & Grading**: 
+   - Retrieves relevant documents from a Pinecone vector store using OpenAI embeddings
+   - Grades documents for relevance to the user's question
+   - Filters out irrelevant documents to improve response quality
 
-2. Activate the virtual environment:
-   - On Windows:
-     ```bash
-     venv\Scripts\activate
-     ```
-   - On macOS/Linux:
-     ```bash
-     source venv/bin/activate
-     ```
+3. **Query Rewriting**: Reformulates queries that don't initially yield quality results to improve document retrieval
 
-3. Install the required dependencies:
-   ```bash
-   pip install -r requirements.txt
-   ```
+4. **Web Search**: Uses Tavily Search API to retrieve real-time information from the web when needed
 
-### Running the Application
+5. **Response Generation**: Uses Claude 3.7 Sonnet to generate comprehensive, accurate responses based on the retrieved context
 
-1. Start the API server:
-   ```bash
-   python api/app.py
-   ```
+6. **Response Validation**: Checks responses for hallucinations and relevance to ensure high-quality answers
 
-2. Launch the frontend application:
-   ```bash
-   cd frontend
-   npm install  # Only needed for the first time
-   npm start
-   ```
+### Technology Stack
 
-3. Access the application in your browser at `http://localhost:3000`
+- **Vector Database**: Pinecone for document storage and retrieval
+- **Embedding Models**: OpenAI's text-embedding-3-large for document vectorization
+- **LLMs**: 
+  - Claude 3.7 Sonnet for high-quality response generation
+  - GPT-4o-mini for routing and grading tasks
+- **Frontend**: Streamlit-based interface for user interaction
+- **Processing Framework**: LangGraph for flexible workflow orchestration
+
+### Decision Flow
+
+1. User submits a question via the Streamlit interface
+2. The system analyzes the question to determine the best information source
+3. Based on the decision, the system either:
+   - Retrieves documents from Pinecone and grades their relevance
+   - Searches the web for current information
+4. The system generates a response using the retrieved information
+5. The response is checked for quality and relevance
+6. If needed, the query is reformulated and the process repeats
+7. The final response is streamed to the user
+
+This adaptive approach ensures that responses are not only accurate but also sourced from the most appropriate knowledge base for each specific query.
+
