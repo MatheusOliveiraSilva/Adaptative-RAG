@@ -137,7 +137,7 @@ class AdaptiveRAGNodes:
         web_results = "\n".join([d["content"] for d in docs])
         web_results_doc = Document(page_content=web_results, metadata={"source": "web"})
 
-        return {"documents": [web_results_doc], "question": state["question"], "messages": state["messages"]}
+        return {"documents": [web_results_doc], "question": question, "messages": state["messages"]}
     
     def grade_generation(self, state: GraphState) -> GraphState:
         """
