@@ -4,7 +4,7 @@ import types
 
 # Cria um módulo dummy para 'pinecone_plugins.inference' que evita o erro
 dummy = types.ModuleType("pinecone_plugins.inference")
-dummy.__installables__ = None
+dummy.__installables__ = []
 sys.modules["pinecone_plugins.inference"] = dummy
 
 # Get the base directory and append to sys.path to allow imports
@@ -50,13 +50,11 @@ if os.path.exists(css_path):
 
 API_URL = os.environ.get("API_URL")
 
-# Simple session management
 if "user_session_id" not in st.session_state:
     st.session_state.user_session_id = None
 if "user_name" not in st.session_state:
     st.session_state.user_name = None
 
-# Check for existing session cookie
 raw_cookies = st_javascript("document.cookie")
 cookies_dict = {}
 if raw_cookies:
@@ -66,12 +64,10 @@ if raw_cookies:
             key, value = key_value
             cookies_dict[key] = value
 
-# Get session ID from cookie if available
 session_token = cookies_dict.get("session_token")
 if session_token and not st.session_state.user_session_id:
     st.session_state.user_session_id = session_token
 
-# Login form
 if not st.session_state.user_session_id:
     st.markdown(
         """
@@ -88,20 +84,17 @@ if not st.session_state.user_session_id:
         submit = st.form_submit_button("Login")
         
         if submit and username:
-            # Call the backend login API
             response = requests.post(
                 f"{API_URL}/auth/login-simple",
                 json={"username": username}
             )
             
             if response.status_code == 200:
-                # Extract session token from response
                 data = response.json()
                 new_session_id = data["session_token"]
                 st.session_state.user_session_id = new_session_id
                 st.session_state.user_name = data["user"]["name"]
                 
-                # Set cookie via JavaScript
                 st.markdown(
                     f"""
                     <script>
@@ -139,7 +132,6 @@ def load_conversations():
 
 st.sidebar.title("Conversations")
 
-# Logout button
 if st.sidebar.button("Logout"):
     st.session_state.user_session_id = None
     st.session_state.user_name = None
@@ -147,7 +139,6 @@ if st.sidebar.button("Logout"):
     st.session_state.thread_id = None
     st.session_state.thoughts = ""
     
-    # Clear cookie via JavaScript
     st.markdown(
         """
         <script>
@@ -164,7 +155,6 @@ if st.sidebar.button("New Chat"):
     st.session_state.thoughts = ""
     st.rerun()
 
-# Verifica e exibe o nome do usuário se disponível
 if st.session_state.user_name:
     st.sidebar.markdown(f"👤 **{st.session_state.user_name}**")
 
@@ -217,7 +207,6 @@ if prompt:
             st.error("Error to create new conversation.")
         st.session_state.messages.append({"role": "user", "content": prompt})
     else:
-        # Se já existe
         st.session_state.messages.append({"role": "user", "content": prompt})
 
     with st.chat_message("user"):

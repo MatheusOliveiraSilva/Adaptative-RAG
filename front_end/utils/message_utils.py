@@ -10,7 +10,7 @@ from pathlib import Path
 root_dir = Path().absolute()
 load_dotenv(dotenv_path=root_dir / ".env")
 
-# Explicitly use the OpenAI API key
+# summary_llm
 summary_llm = ChatOpenAI(
     model="gpt-4o-mini-2024-07-18",
     openai_api_key=os.environ.get("OPENAI_API_KEY")
@@ -29,10 +29,8 @@ def stream_assistant_response(prompt, graph, memory_config) -> str:
     is_routing = False
     document_relevance_low = False
 
-    # Reinicia os pensamentos para a interação atual (não acumula com interações anteriores)
     st.session_state.thoughts = ""
 
-    # Placeholders para atualização em tempo real
     final_placeholder = st.empty()
     thinking_placeholder = st.empty()
     node_placeholder = st.empty()
@@ -99,7 +97,6 @@ def stream_assistant_response(prompt, graph, memory_config) -> str:
                                 final_placeholder.markdown(final_response)
         time.sleep(0.3)
 
-    # Limpa qualquer placeholder restante ao finalizar
     loading_placeholder.empty()
     node_placeholder.empty()
     
@@ -120,12 +117,9 @@ def convert_messages_to_save(messages: list) -> list:
     
     for msg in messages:
         if isinstance(msg, HumanMessage):
-            # Mensagem do usuário - extrair diretamente
             messages_to_save.append(["user", msg.content])
         elif isinstance(msg, AIMessage):
-            # Mensagem do assistente - pode conter thinking e text
             if isinstance(msg.content, list):
-                # Extrair 'thinking' e 'text' da lista de conteúdo
                 thinking_content = None
                 text_content = None
                 
@@ -136,7 +130,6 @@ def convert_messages_to_save(messages: list) -> list:
                         elif 'type' in item and item['type'] == 'text' and 'text' in item:
                             text_content = item['text']
                 
-                # Adicionar thinking e text como mensagens separadas
                 if thinking_content:
                     messages_to_save.append(["assistant_thought", thinking_content])
                 if text_content:
