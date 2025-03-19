@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 from pinecone import Pinecone
 from pathlib import Path
 from langchain_core.documents import Document
-from langchain_core.messages import SystemMessage
+from langchain_core.messages import SystemMessage, HumanMessage, AIMessageChunk
 from langchain_community.tools.tavily_search import TavilySearchResults
 from agent.lang_graph.states import GraphState
 from agent.lang_graph.chains import (
@@ -13,6 +13,7 @@ from agent.lang_graph.chains import (
     document_grader_chain, hallucination_grader_chain
 )
 from agent.lang_graph.prompts import RAG_SYSTEM_PROMPT
+from langgraph.config import get_stream_writer
 
 import os
 
@@ -57,7 +58,16 @@ class AdaptiveRAGNodes:
         Returns:
             GraphState with documents and question
         """
+        
         print(f"--- Retrieving documents ---")
+        
+        writer = get_stream_writer()
+        
+        writer({
+            "custom_data": "node_feedback",
+            "langgraph_node": "retrieve_documents",
+            "message": "Retrieving documents..."
+        })
 
         question = state["messages"][-1].content
         docs = self.retriever.invoke(question)
